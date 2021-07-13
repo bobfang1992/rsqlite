@@ -1,0 +1,15 @@
+[package]
+name = "rsqlite"
+version = "0.1.0"
+edition = "2018"
+
+[lib]
+name = "rsqlite"
+path = "src/lib.rs"
+
+[[bin]]
+name = "rsqlite-run"
+path = "src/bin.rs"
+
+[dependencies]
+sqlparser = "0.9.0"
