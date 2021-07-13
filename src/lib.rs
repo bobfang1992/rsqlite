@@ -7,21 +7,19 @@ pub mod sql_parser {
 
     pub fn parse_sql(sql: &str) -> Result<std::vec::Vec<Statement>, ParserError> {
         let dialect = SQLiteDialect {};
-
-        let ast = Parser::parse_sql(&dialect, sql);
-        return ast;
+        Parser::parse_sql(&dialect, sql)
     }
 }
 
 pub mod util {
     pub fn as_u16_be(array: &[u8; 2]) -> u16 {
-        ((array[0] as u16) << 8) + ((array[1] as u16) << 0)
+        ((array[0] as u16) << 8) + (array[1] as u16)
     }
     pub fn as_u32_be(array: &[u8; 4]) -> u32 {
         ((array[0] as u32) << 24)
             + ((array[1] as u32) << 16)
             + ((array[2] as u32) << 8)
-            + ((array[3] as u32) << 0)
+            + (array[3] as u32)
     }
 }
 
@@ -54,11 +52,9 @@ pub mod db_page {
                         page_size_in_bits: util::as_u16_be(&page_size_array),
                         size_of_db_in_pages: util::as_u32_be(&page_count_array),
                     };
-                    return Ok(header);
+                    Ok(header)
                 }
-                Err(e) => {
-                    return Err(e);
-                }
+                Err(e) => Err(e),
             }
         }
     }
