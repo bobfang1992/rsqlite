@@ -85,7 +85,8 @@ pub mod db_page {
     pub struct DBPage {
         pub page_no: u32,
         pub page_type: DBPageType,
-
+        pub number_of_cells: u16,
+        pub cell_pointer_array: Vec<u16>,
         pub raw_bytes: Vec<u8>,
     }
 
@@ -93,8 +94,8 @@ pub mod db_page {
         fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
             write!(
                 f,
-                "DBPage {{ page_no: {:?}, page_type: {:?} }}",
-                self.page_no, self.page_type
+                "DBPage {{ page_no: {:?}, page_type: {:?}, number_of_cells: {:?}, cell_pointer_arrary: {:?} }}",
+                self.page_no, self.page_type, self.number_of_cells, self.cell_pointer_array
             )
         }
     }
@@ -115,9 +116,20 @@ pub mod db_page {
 
             let page_type = DBPageType::from_u8(page_header[0])?;
 
+            let number_of_cells = util::as_u16_be(&page_header[3..5].try_into().unwrap());
+
+            let cell_pointer_array = DBPage::get_cell_pointer_array(
+                &raw_bytes,
+                page_type,
+                number_of_cells,
+                page_no == 1,
+            );
+
             return Ok(DBPage {
                 page_no: page_no,
                 page_type: page_type,
+                number_of_cells: number_of_cells,
+                cell_pointer_array: cell_pointer_array,
                 raw_bytes: raw_bytes,
             });
         }
@@ -129,53 +141,29 @@ pub mod db_page {
             return Ok(page);
         }
 
-        pub fn first_page_size(page_size: u16) -> u16 {
-            return page_size - 100;
-        }
-
-        pub fn get_page_type_from_raw_data(raw_data: &Vec<u8>) -> Result<DBPageType, Error> {
-            match raw_data[0] {
-                0x02 => Ok(DBPageType::IndexInteriorPage),
-                0x05 => Ok(DBPageType::TableInteriorPage),
-                0x0A => Ok(DBPageType::IndexLeafPage),
-                0x0D => Ok(DBPageType::TableLeafPage),
-                _ => Err(Error::new(ErrorKind::InvalidData, "Unknown page type")),
-            }
-        }
-
-        pub fn get_number_of_cells_from_raw_data(raw_data: &Vec<u8>) -> u16 {
-            let page_size_array: [u8; 2] = raw_data[3..5].try_into().unwrap();
-            return util::as_u16_be(&page_size_array);
-        }
-
-        pub fn get_start_pos_of_cell_content_region_from_raw_data(raw_data: &Vec<u8>) -> u16 {
-            let cell_content_pos: [u8; 2] = raw_data[5..7].try_into().unwrap();
-            return util::as_u16_be(&cell_content_pos);
-        }
-
-        pub fn get_right_most_pointer_from_raw_data(raw_data: &Vec<u8>) -> u32 {
-            let right_most_pointer_array: [u8; 4] = raw_data[8..12].try_into().unwrap();
-            return util::as_u32_be(&right_most_pointer_array);
-        }
-
         pub fn get_cell_pointer_array(
             raw_data: &Vec<u8>,
             page_type: DBPageType,
             number_of_cells: u16,
+            is_first_page: bool,
         ) -> Vec<u16> {
             let mut cell_pointer_array = vec![0u16; usize::from(number_of_cells)];
-            let start_offset = match page_type {
+            let mut start_offset = match page_type {
                 DBPageType::IndexInteriorPage => 12,
                 DBPageType::TableInteriorPage => 12,
                 DBPageType::IndexLeafPage => 8,
                 DBPageType::TableLeafPage => 8,
             };
 
+            if is_first_page {
+                start_offset += 100;
+            }
+
             for i in 0..number_of_cells {
                 let start = usize::from(start_offset + (i * 2));
                 let end = usize::from(start_offset + ((i + 1) * 2));
 
-                let cell_pointer_array_array: [u8; 2] = raw_data[start..end].try_into().unwrap();
+                let cell_pointer_array_array: &[u8; 2] = raw_data[start..end].try_into().unwrap();
                 let cell_pointer_array_value = util::as_u16_be(&cell_pointer_array_array);
                 cell_pointer_array[usize::from(i)] = cell_pointer_array_value;
             }
