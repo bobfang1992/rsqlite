@@ -63,6 +63,7 @@ mod tests {
         let second_page = self::db_page::DBPage::read_page(&mut f, &header, 2).unwrap();
         let second_cell_length = second_page.get_cell_length(0);
         println!("second page: {:?}", second_page);
-        println!("Second cell length: {:?}", second_cell_length)
+        println!("Second cell length: {:?}", second_cell_length);
+        println!("all bytes second: {:?}", second_page.raw_bytes);
     }
 }
