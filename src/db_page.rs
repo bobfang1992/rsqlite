@@ -156,10 +156,8 @@ impl DBPage {
             )),
             DBPageType::TableLeafPage => {
                 let cell_length_start = self.cell_pointer_array[usize::from(cell_no)];
-                println!("Cell length start: {}", cell_length_start);
-                let (result, size) =
+                let (result, _) =
                     varint::read_varint(&self.raw_bytes[usize::from(cell_length_start)..]);
-                println!("Cell length: {}", size);
                 Ok(result)
             }
         }

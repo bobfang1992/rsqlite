@@ -7,3 +7,7 @@ pub fn as_u32_be(array: &[u8; 4]) -> u32 {
         + ((array[2] as u32) << 8)
         + (array[3] as u32)
 }
+
+pub fn as_f64_be(array: [u8; 8]) -> f64 {
+    f64::from_be_bytes(array)
+}

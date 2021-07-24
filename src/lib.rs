@@ -1,11 +1,14 @@
 pub mod db_page;
+pub mod record;
 pub mod sql_parser;
 pub mod util;
+pub mod value;
 pub mod varint;
 
 #[cfg(test)]
 mod tests {
     use crate::db_page;
+    use crate::record;
     use std::fs::File;
     use std::io::Read;
     use std::path;
@@ -63,7 +66,27 @@ mod tests {
         let second_page = self::db_page::DBPage::read_page(&mut f, &header, 2).unwrap();
         let second_cell_length = second_page.get_cell_length(0);
         println!("second page: {:?}", second_page);
-        println!("Second cell length: {:?}", second_cell_length);
+        println!("Second page first cell length: {:?}", second_cell_length);
+        println!(
+            "Second page second cell length: {:?}",
+            second_page.get_cell_length(1)
+        );
         println!("all bytes second: {:?}", second_page.raw_bytes);
+
+        let r = record::Record::from_cell_bytes(&second_page.raw_bytes[1022..]);
+        println!("record: {:?}", r);
+
+        let third_page = self::db_page::DBPage::read_page(&mut f, &header, 3).unwrap();
+        let third_cell_length = third_page.get_cell_length(0);
+        println!("second page: {:?}", third_page);
+        println!("Second page first cell length: {:?}", third_cell_length);
+        println!(
+            "Second page second cell length: {:?}",
+            third_page.get_cell_length(1)
+        );
+        println!("all bytes second: {:?}", third_page.raw_bytes);
+
+        let r2 = record::Record::from_cell_bytes(&third_page.raw_bytes[1020..]);
+        println!("record: {:?}", r2);
     }
 }
