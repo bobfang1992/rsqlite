@@ -79,7 +79,7 @@ impl DBPage {
         let mut page = vec![0u8; usize::from(size)];
         f.seek(SeekFrom::Start(off_set))?; // move cusor to offset
         f.read_exact(&mut page)?;
-        return Ok(page);
+        Ok(page);
     }
 
     pub fn get_cell_pointer_array(
@@ -132,11 +132,11 @@ impl DBPage {
             DBPage::get_cell_pointer_array(&raw_bytes, page_type, number_of_cells, page_no == 1);
 
         return Ok(DBPage {
-            page_no: page_no,
-            page_type: page_type,
-            number_of_cells: number_of_cells,
-            cell_pointer_array: cell_pointer_array,
-            raw_bytes: raw_bytes,
+            page_no,
+            page_type,
+            number_of_cells,
+            cell_pointer_array,
+            raw_bytes,
         });
     }
 

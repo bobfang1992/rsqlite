@@ -46,6 +46,8 @@ impl Value {
             _ => panic!("unexpected serial type"),
         }
     }
+
+    #[allow(clippy::all)]
     pub fn as_i64(&self) -> Option<i64> {
         let mut array: [u8; 8] = [0, 0, 0, 0, 0, 0, 0, 0];
         match self {
