@@ -26,10 +26,10 @@ impl Record {
         println!("serial types: {:?}", serial_types);
         println!("cursor: {}", cursor);
         let mut result = Vec::<value::Value>::with_capacity(serial_types.len());
-        for i in 0..serial_types.len() {
-            let v = value::Value::new(serial_types[i], &buf[cursor..]);
+        for t in serial_types {
+            let v = value::Value::new(t, &buf[cursor..]);
             result.push(v);
-            cursor += value::Value::consume(serial_types[i]);
+            cursor += value::Value::consume(t);
         }
         Some(Record(result))
     }

@@ -83,7 +83,7 @@ impl DBPage {
     }
 
     pub fn get_cell_pointer_array(
-        raw_data: &Vec<u8>,
+        raw_data: &[u8],
         page_type: DBPageType,
         number_of_cells: u16,
         is_first_page: bool,
@@ -109,7 +109,7 @@ impl DBPage {
             cell_pointer_array[usize::from(i)] = cell_pointer_array_value;
         }
 
-        return cell_pointer_array;
+        cell_pointer_array
     }
 
     pub fn read_page(f: &mut File, header: &DBHeader, page_no: u32) -> Result<DBPage, Error> {
@@ -131,13 +131,13 @@ impl DBPage {
         let cell_pointer_array =
             DBPage::get_cell_pointer_array(&raw_bytes, page_type, number_of_cells, page_no == 1);
 
-        return Ok(DBPage {
+        Ok(DBPage {
             page_no,
             page_type,
             number_of_cells,
             cell_pointer_array,
             raw_bytes,
-        });
+        })
     }
 
     pub fn get_cell_length(&self, cell_no: u16) -> Result<i64, Error> {
