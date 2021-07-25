@@ -13,10 +13,19 @@ pub enum Value {
     Float64(f64),
     Zero,
     One,
+    SQLiteString(String),
 }
 
 impl Value {
     pub fn consume(serial_type: u64) -> usize {
+        if serial_type >= 12 {
+            if serial_type % 2 == 0 {
+                return ((serial_type - 12) / 2) as usize;
+            }
+            if serial_type % 2 == 1 {
+                return ((serial_type - 13) / 2) as usize;
+            }
+        }
         match serial_type {
             0x00 => 0,
             0x01 => 1,
@@ -32,6 +41,21 @@ impl Value {
         }
     }
     pub fn new(serial_type: u64, value: &[u8]) -> Value {
+        if serial_type >= 12 {
+            if serial_type % 2 == 0 {
+                panic!("invalid serial_type: {:?}", serial_type);
+            }
+            if serial_type % 2 == 1 {
+                let length = ((serial_type - 13) / 2) as usize;
+                let s = std::str::from_utf8(&value[..length]);
+                if let Ok(ss) = s {
+                    return Value::SQLiteString(ss.to_string());
+                } else {
+                    panic!("correputed string bytes {:?}", &value[..length]);
+                }
+            }
+        }
+
         match serial_type {
             0x00 => Value::Null,
             0x01 => Value::Int8(value[0..1].try_into().unwrap()),

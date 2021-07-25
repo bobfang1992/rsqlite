@@ -8,7 +8,6 @@ pub mod varint;
 #[cfg(test)]
 mod tests {
     use crate::db_page;
-    use crate::record;
     use std::fs::File;
     use std::io::Read;
     use std::path;
@@ -63,40 +62,43 @@ mod tests {
         println!("all bytes: {:?}", &first_page.raw_bytes);
         println!("cell length: {:?}", cell_length);
 
-        let second_page = self::db_page::DBPage::read_page(&mut f, &header, 2).unwrap();
-        let second_cell_length = second_page.get_cell_length(0);
-        println!("second page: {:?}", second_page);
-        println!("Second page first cell length: {:?}", second_cell_length);
-        println!(
-            "Second page second cell length: {:?}",
-            second_page.get_cell_length(1)
-        );
-        println!("all bytes second: {:?}", second_page.raw_bytes);
-
-        let r = record::Record::from_cell_bytes(&second_page.raw_bytes[1022..]);
-        println!("record: {:?}", r);
-
-        let third_page = self::db_page::DBPage::read_page(&mut f, &header, 3).unwrap();
-        let third_cell_length = third_page.get_cell_length(0);
-        println!("second page: {:?}", third_page);
-        println!("Second page first cell length: {:?}", third_cell_length);
-        println!(
-            "Second page second cell length: {:?}",
-            third_page.get_cell_length(1)
-        );
-        println!("all bytes second: {:?}", third_page.raw_bytes);
-
-        let r3 = record::Record::from_cell_bytes(&third_page.raw_bytes[1013..]);
-        println!("record: {:?}", r3);
-
-        let r2 = record::Record::from_cell_bytes(&third_page.raw_bytes[1020..]);
-        println!("record: {:?}", r2);
-
-        let cell_0 = third_page.get_cell(0);
+        let cell_0 = first_page.get_cell(0);
         println!("cell 0: {:?}", cell_0);
-        let cell_1 = third_page.get_cell(1);
-        println!("cell 1: {:?}", cell_1);
-        let cell_2 = third_page.get_cell(2);
-        println!("cell 2: {:?}", cell_2);
+
+        // let second_page = self::db_page::DBPage::read_page(&mut f, &header, 2).unwrap();
+        // let second_cell_length = second_page.get_cell_length(0);
+        // println!("second page: {:?}", second_page);
+        // println!("Second page first cell length: {:?}", second_cell_length);
+        // println!(
+        //     "Second page second cell length: {:?}",
+        //     second_page.get_cell_length(1)
+        // );
+        // println!("all bytes second: {:?}", second_page.raw_bytes);
+
+        // let r = record::Record::from_cell_bytes(&second_page.raw_bytes[1022..]);
+        // println!("record: {:?}", r);
+
+        // let third_page = self::db_page::DBPage::read_page(&mut f, &header, 3).unwrap();
+        // let third_cell_length = third_page.get_cell_length(0);
+        // println!("second page: {:?}", third_page);
+        // println!("Second page first cell length: {:?}", third_cell_length);
+        // println!(
+        //     "Second page second cell length: {:?}",
+        //     third_page.get_cell_length(1)
+        // );
+        // println!("all bytes second: {:?}", third_page.raw_bytes);
+
+        // let r3 = record::Record::from_cell_bytes(&third_page.raw_bytes[1013..]);
+        // println!("record: {:?}", r3);
+
+        // let r2 = record::Record::from_cell_bytes(&third_page.raw_bytes[1020..]);
+        // println!("record: {:?}", r2);
+
+        // let cell_0 = third_page.get_cell(0);
+        // println!("cell 0: {:?}", cell_0);
+        // let cell_1 = third_page.get_cell(1);
+        // println!("cell 1: {:?}", cell_1);
+        // let cell_2 = third_page.get_cell(2);
+        // println!("cell 2: {:?}", cell_2);
     }
 }
