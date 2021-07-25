@@ -86,7 +86,17 @@ mod tests {
         );
         println!("all bytes second: {:?}", third_page.raw_bytes);
 
+        let r3 = record::Record::from_cell_bytes(&third_page.raw_bytes[1013..]);
+        println!("record: {:?}", r3);
+
         let r2 = record::Record::from_cell_bytes(&third_page.raw_bytes[1020..]);
         println!("record: {:?}", r2);
+
+        let cell_0 = third_page.get_cell(0);
+        println!("cell 0: {:?}", cell_0);
+        let cell_1 = third_page.get_cell(1);
+        println!("cell 1: {:?}", cell_1);
+        let cell_2 = third_page.get_cell(2);
+        println!("cell 2: {:?}", cell_2);
     }
 }

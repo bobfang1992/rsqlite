@@ -1,3 +1,4 @@
+use crate::record;
 use crate::util;
 use crate::varint;
 use std::convert::TryInto;
@@ -62,6 +63,36 @@ pub struct DBPage {
     pub number_of_cells: u16,
     pub cell_pointer_array: Vec<u16>,
     pub raw_bytes: Vec<u8>,
+}
+
+#[derive(Debug)]
+pub enum PageCell {
+    TableLeafPageCell {
+        length: u64,
+        row_id: u64,
+        values: record::Record,
+    },
+}
+
+impl PageCell {
+    pub fn from_bytes(page_type: &DBPageType, bytes: &[u8]) -> Option<PageCell> {
+        match page_type {
+            DBPageType::TableLeafPage => {
+                let mut cursor = 0;
+                let (length, length_size_in_bytes) = varint::read_varint(&bytes[cursor..]);
+                cursor += length_size_in_bytes;
+                let (row_id, row_id_size_in_bytes) = varint::read_varint(&bytes[cursor..]);
+                cursor += row_id_size_in_bytes;
+                let record = record::Record::from_cell_bytes(&bytes[cursor..]);
+                record.map(|r| PageCell::TableLeafPageCell {
+                    length: length as u64,
+                    row_id: row_id as u64,
+                    values: r,
+                })
+            }
+            _ => None,
+        }
+    }
 }
 
 impl fmt::Debug for DBPage {
@@ -139,7 +170,6 @@ impl DBPage {
             raw_bytes,
         })
     }
-
     pub fn get_cell_length(&self, cell_no: u16) -> Result<i64, Error> {
         match self.page_type {
             DBPageType::IndexInteriorPage => Err(Error::new(
@@ -161,5 +191,13 @@ impl DBPage {
                 Ok(result)
             }
         }
+    }
+
+    pub fn get_cell(&self, cell_no: u16) -> Option<PageCell> {
+        if cell_no >= self.number_of_cells {
+            return None;
+        }
+        let start_pos = usize::from(self.cell_pointer_array[usize::from(cell_no)]);
+        PageCell::from_bytes(&self.page_type, &self.raw_bytes[start_pos..])
     }
 }
